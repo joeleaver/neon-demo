@@ -1,9 +1,0 @@
-- hosts: localhost
-  tasks:
-    - name: remove docker image    
-      local_action: 
-        module: docker_image
-        path: docker_image
-        name: neon-demo
-        tag: v1   
-        state: absent

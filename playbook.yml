@@ -1,9 +1,46 @@
 - hosts: localhost
   tasks:
+    - include_vars: environment.yml.local
     - name: build docker image
-      local_action:
-          module: docker_image
-          path: docker_image
-          name: neon-demo
-          tag: v1
-          state: build
+      docker_image:
+        path: "{{ docker_image_path }}"
+        name: neon-demo
+        tag: v1
+        state: build
+
+    - name: generate ec2 keypair
+      ec2_key:
+        region: 'us-west-2'
+        name: neon-demo-key
+
+    - name: build ec2 instance
+      ec2:
+         region: 'us-west-2'
+         instance_type: t2.micro
+         image: ami-9abea4fb
+         key_name: neon-demo-key
+         wait: true
+         exact_count: 1
+         count_tag:
+            Name: neon-demo
+         instance_tags:
+            Name: neon-demo
+      register: ec2
+
+    - name: Add instance public IPs to host group
+      add_host: hostname={{ item.public_ip }} groups=ec2hosts
+      with_items: ec2.instances   
+
+    - name: Wait for SSH to come up
+      wait_for: host={{ item.public_dns_name }} port=22 delay=60 timeout=320 state=started
+      with_items: ec2.instances      
+
+- hosts: ec2hosts
+  gather_facts: true
+  tasks:
+    - name: load docker image
+      docker_image:
+        path: "{{ docker_image_path }}"
+        name: neon-demo
+        tag: v1
+        state: build

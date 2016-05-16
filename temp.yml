@@ -1,0 +1,28 @@
+    - name: start docker image
+      docker:
+        image: 'neon-demo:v1'
+        command: "/home/neon/examples/mnist_mlp.py -v  --log=/neon-results/{{ neon_results_file }}"
+        detach: false
+        state: started
+        volumes: "{{ neon_results_path }}:/neon-results/"
+    - name: upload results to s3
+      s3: 
+        bucket: "{{ s3_bucket }}"
+        object: "{{ s3_object }}"
+        src: "{{ neon_results_path }}{{ neon_results_file }}"
+        mode: put
+    - name: send confirmation email
+      local_action: 
+          module: mail
+          host: "{{ smtp_host }}"
+          port: "{{ smtp_port }}"
+          username: "{{ smtp_username }}"
+          password: "{{ smtp_password }}"
+          to: "{{ email_to }}"
+          subject: 'Training Complete'
+          body: "Neon has completed training. Logs are also available at S3 Bucket: {{ s3_bucket }}, S3 Object: {{ s3_object }} "
+          attach: "{{ neon_results_path }}{{ neon_results_file }}"
+    - name: clean up log file
+      file:
+        path: "{{ neon_results_path }}{{ neon_results_file }}"
+        state: absent
