@@ -15,7 +15,7 @@
         email: '{{ dockerhub_email }}'
 
     - name: push docker image to repo
-      shell: docker push joeleaver/neon-demo  # docker push is supported by the docker ansible module in 2.1!
+      shell: "docker push {{ docker_image_name }}"  # docker push is supported by the docker ansible module in 2.1!
                                               # if you really didn't want to use a repo -- and really, you should have a private repo if you're using a lot of docker --
                                               # you could docker save -> ssh -> docker load 
 
