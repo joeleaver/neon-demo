@@ -1,0 +1,15 @@
+docker_image_path: 
+neon_results_path: '/home/ubuntu/neon-results/'
+neon_results_file: 'results.txt'
+smtp_host: 
+smtp_port: 
+smtp_username: 
+smtp_password: 
+email_to: 
+s3_bucket: 'neon-results'
+s3_object: 'results.txt'
+dockerhub_username: 
+dockerhub_password: 
+dockerhub_email: 
+docker_image_name: 
+docker_image_tag: 
